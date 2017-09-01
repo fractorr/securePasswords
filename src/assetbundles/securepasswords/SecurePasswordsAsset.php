@@ -4,7 +4,7 @@
  *
  * Make passwords as secure as you want
  *
- * @link      http://www.fractorr.net
+ * @link      http://www.fractorr.com
  * @copyright Copyright (c) 2017 Trevor Orr
  */
 
@@ -42,6 +42,7 @@ class SecurePasswordsAsset extends AssetBundle
      */
     public function init()
     {
+    	/*
         // define the path that your publishable resources live
         $this->sourcePath = "@fractorr/secure-passwords/assetbundles/securepasswords/dist";
 
@@ -59,7 +60,8 @@ class SecurePasswordsAsset extends AssetBundle
         $this->css = [
             'css/SecurePasswords.css',
         ];
-
+		*/
+		
         parent::init();
     }
 }

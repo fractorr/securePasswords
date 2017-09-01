@@ -4,7 +4,7 @@
  *
  * Make passwords as secure as you want
  *
- * @link      http://www.fractorr.net
+ * @link      http://www.fractorr.com
  * @copyright Copyright (c) 2017 Trevor Orr
  */
 
@@ -40,7 +40,8 @@ class Settings extends Model
      * @var string
      */
     public $someAttribute = 'Some Default';
-
+	public $passwordRules = '';
+	
     // Public Methods
     // =========================================================================
 
@@ -57,8 +58,6 @@ class Settings extends Model
     public function rules()
     {
         return [
-            ['someAttribute', 'string'],
-            ['someAttribute', 'default', 'value' => 'Some Default'],
         ];
     }
 }

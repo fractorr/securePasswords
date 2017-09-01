@@ -4,7 +4,7 @@
  *
  * Make passwords as secure as you want
  *
- * @link      http://www.fractorr.net
+ * @link      http://www.fractorr.com
  * @copyright Copyright (c) 2017 Trevor Orr
  */
 
@@ -20,7 +20,12 @@ use craft\events\PluginEvent;
 use craft\web\UrlManager;
 use craft\events\RegisterUrlRulesEvent;
 
+use craft\elements\User;
+use craft\services\Users;
+
+
 use yii\base\Event;
+
 
 /**
  * Craft plugins are very much like little applications in and of themselves. We’ve made
@@ -102,11 +107,40 @@ class SecurePasswords extends Plugin
         );
 
 		Event::on(
-			Elements::class, 
-			Elements::EVENT_BEFORE_SET_PASSWORD, 
-            function (ElementEvent $event) {
-				// https://craftcms.com/docs/plugins/events-reference#users-onBeforeSetPassword
-				// Event handlers can prevent the user’s password from getting changed by setting $event->performAction to false.
+			User::class, 
+			User::EVENT_BEFORE_SAVE, 
+            function ($event) {
+				$newPwd = $event->sender['newPassword'];
+				
+				$rules = $this->settingRulesToArray($this->getSettings()->passwordRules);
+
+				$errors = array();
+
+				foreach($rules as $rule)
+				{
+					if (isset($rule["active"]) && $rule["active"] && $rule["regex"] != "") 
+					{
+						preg_match("/" . $rule["regex"] . "/", $newPwd, $output_array);
+
+						if (sizeof($output_array) == 0 && $rule["match"] == "no_match") 
+						{
+							array_push($errors, Craft::t('secure-passwords', 'Password') . ": " . $rule["message"]);
+
+						} else if (sizeof($output_array) != 0 && $rule["match"] == "match") 
+						{
+							array_push($errors, Craft::t('secure-passwords', 'Password') . ": " . $rule["message"]);
+						}
+					}
+				}
+
+				if (sizeof($errors)) 
+				{
+					foreach($errors as $error) {
+						Craft::$app->getSession()->setNotice(Craft::t('secure-passwords', $error));
+					}
+					
+					$event->isValid = false;
+				}
             }
 		);
 /**
@@ -164,5 +198,23 @@ class SecurePasswords extends Plugin
                 'settings' => $this->getSettings()
             ]
         );
+    }
+    
+    protected function settingRulesToArray($settingRules): array
+    {
+    	$outRules = [];
+    	
+    	foreach($settingRules as $rule) 
+    	{
+    		array_push($outRules, [
+    		    "label" 	=> $rule[0],
+    		    "message" 	=> $rule[1],
+    		    "regex" 	=> $rule[2],
+    		    "match" 	=> $rule[3],
+    		    "active" 	=> $rule[4],
+    		]);
+    	}
+    	
+    	return $outRules;
     }
 }
