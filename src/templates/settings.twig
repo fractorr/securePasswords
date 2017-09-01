@@ -1,0 +1,67 @@
+{#
+/**
+ * Secure Passwords plugin for Craft CMS 3.x
+ *
+ * Secure Passwords Settings.twig
+ *
+ * @author    Trevor Orr
+ * @copyright Copyright (c) 2017 Trevor Orr
+ * @link      http://www.fractorr.net
+ * @package   SecurePasswords
+ * @since     1.0.0
+ */
+#}
+
+{% import "_includes/forms" as forms %}
+
+{% do view.registerAssetBundle("fractorr\\securepasswords\\assetbundles\\securepasswords\\SecurePasswordsAsset") %}
+
+{{ forms.editableTableField({
+	    label: 'Password Rules',
+	    instructions: 'Add as many rules as you want',
+	    id: 'passwordRules',
+	    name: 'passwordRules',
+	    rows: settings['passwordRules'],
+	    cols: [
+	    	{
+	    		heading: "Title",
+	    		info: "Friendly Name",
+	    		type: "singleline",
+	    	},
+	    	
+	    	{
+	    		heading: "Error Message",
+	    		info: "Error message to display",
+	    		type: "singleline",
+	    	},
+	    	
+	    	{
+	    		heading: "Regular Expression",
+	    		info: "Regular expression to validate the password",
+	    		type: "singleline",
+	    	},
+	    	
+	    	{
+	    		heading: "Matching",
+	    		info: "How to match the rule",
+	    		type: "select",
+	    		options: [
+	    			{label: 'Match',    value: 'match'},
+	    			{label: 'No Match', value: 'no_match'},
+	    		]
+	    	},
+	    	
+	    	{
+	    		heading: "Enabled",
+	    		info: "Output Format (pdf, png, jpg, etc)",
+	    		type: "select",
+	    		options: [
+	    			{label: 'Yes', value: '1'},
+	    			{label: 'No',  value: '0'},
+	    		]
+	    	},
+	    	
+	    ]
+    })
+}}
+

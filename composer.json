@@ -1,0 +1,50 @@
+{
+    "name": "fractorr/secure-passwords",
+    "description": "Make passwords as secure as you want",
+    "type": "craft-plugin",
+    "version": "1.0.0",
+    "keywords": [
+        "craft",
+        "cms",
+        "craftcms",
+        "craft-plugin",
+        "secure passwords"
+    ],
+    "support": {
+        "docs": "https://github.com/fractorr/secure-passwords/blob/master/README.md",
+        "issues": "https://github.com/fractorr/secure-passwords/issues"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Trevor Orr",
+            "homepage": "http://www.fractorr.com"
+        }
+    ],
+    "require": {
+        "craftcms/cms": "~3.0.0-beta.23"
+    },
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://asset-packagist.org"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+          "fractorr\\securepasswords\\": "src/"
+        }
+    },
+    "extra": {
+        "name": "Secure Passwords",
+        "handle": "secure-passwords",
+        "schemaVersion": "1.0.0",
+        "hasCpSettings": true,
+        "hasCpSection": false,
+        "changelogUrl": "https://raw.githubusercontent.com/fractorr/secure-passwords/master/CHANGELOG.md",
+        "components": {
+            "securePasswordsService": "fractorr\\securepasswords\\services\\SecurePasswordsService"
+        },
+        "class": "fractorr\\securepasswords\\SecurePasswords"
+    }
+}
