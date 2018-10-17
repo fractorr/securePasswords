@@ -77,6 +77,7 @@ class SecurePasswords extends Plugin
         parent::init();
         self::$plugin = $this;
 
+		/*
         // Register our site routes
         Event::on(
             UrlManager::class,
@@ -94,7 +95,7 @@ class SecurePasswords extends Plugin
                 $event->rules['cpActionTrigger1'] = 'secure-passwords/default/do-something';
             }
         );
-
+		
         // Do something after we're installed
         Event::on(
             Plugins::class,
@@ -105,42 +106,66 @@ class SecurePasswords extends Plugin
                 }
             }
         );
+		*/
 
 		Event::on(
 			User::class, 
 			User::EVENT_BEFORE_SAVE, 
             function ($event) {
+            	$uid = $event->sender['uid'];
+            	$id = $event->sender['id'];
+				$oldPwd = $event->sender['password'];
 				$newPwd = $event->sender['newPassword'];
-				
-				$rules = $this->settingRulesToArray($this->getSettings()->passwordRules);
-
-				$errors = array();
-
-				foreach($rules as $rule)
-				{
-					if (isset($rule["active"]) && $rule["active"] && $rule["regex"] != "") 
+            	
+            	if (!empty($uid) && !empty($oldPwd) && !empty($newPwd)) 
+            	{
+					$rules = $this->settingRulesToArray($this->getSettings()->passwordRules);
+					
+					$errors = array();
+					
+					foreach($rules as $rule)
 					{
-						preg_match("/" . $rule["regex"] . "/", $newPwd, $output_array);
-
-						if (sizeof($output_array) == 0 && $rule["match"] == "no_match") 
+						if (isset($rule["active"]) && $rule["active"] && $rule["regex"] != "") 
 						{
-							array_push($errors, Craft::t('secure-passwords', 'Password') . ": " . $rule["message"]);
-
-						} else if (sizeof($output_array) != 0 && $rule["match"] == "match") 
-						{
-							array_push($errors, Craft::t('secure-passwords', 'Password') . ": " . $rule["message"]);
+							preg_match("/" . $rule["regex"] . "/", $newPwd, $output_array);
+							
+							if (sizeof($output_array) == 0 && $rule["match"] == "no_match") 
+							{
+								array_push($errors, Craft::t('secure-passwords', 'Password') . ": " . $rule["message"]);
+							} 
+							else if (sizeof($output_array) != 0 && $rule["match"] == "match") 
+							{
+								array_push($errors, Craft::t('secure-passwords', 'Password') . ": " . $rule["message"]);
+							}
 						}
 					}
-				}
-
-				if (sizeof($errors)) 
-				{
-					foreach($errors as $error) {
-						Craft::$app->getSession()->setNotice(Craft::t('secure-passwords', $error));
-					}
 					
-					$event->isValid = false;
-				}
+					if (sizeof($errors)) 
+					{
+						foreach($errors as $error) 
+						{
+							if (Craft::$app->getRequest()->getIsCpRequest()) 
+							{
+								Craft::$app->getSession()->setNotice(Craft::t('secure-passwords', $error));
+								//Craft::$app->getSession()->setFlash("error", $error);
+							}
+							
+							if (!Craft::$app->getRequest()->getIsCpRequest()) 
+							{
+								Craft::$app->getSession()->setError(Craft::t('secure-passwords', implode("<br>", $errors)));
+							}
+						}
+						
+						/*
+						echo "<pre>";
+						print_r($event->sender);
+						echo "</pre>";
+						die();
+						*/
+						
+						$event->isValid = false;
+					}
+            	}
             }
 		);
 /**
