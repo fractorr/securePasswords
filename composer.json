@@ -2,7 +2,7 @@
     "name": "fractorr/secure-passwords",
     "description": "Make passwords as secure as you want",
     "type": "craft-plugin",
-    "version": "1.0.5",
+    "version": "1.0.6",
     "keywords": [
         "craft",
         "cms",
