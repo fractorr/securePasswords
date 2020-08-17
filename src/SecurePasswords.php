@@ -1,31 +1,25 @@
 <?php
 /**
- * Secure Passwords plugin for Craft CMS 3.x
+ * Secure Password plugin for Craft CMS 3.x.
  *
- * Make passwords as secure as you want
+ * Enforce stronger passwords on your users.
  *
- * @link      http://www.fractorr.com
- * @copyright Copyright (c) 2017 Trevor Orr
+ * @link      https://fractorr.com
+ *
+ * @copyright Copyright (c) 2020 FractOrr
  */
 
 namespace fractorr\securepasswords;
 
-use fractorr\securepasswords\services\SecurePasswordsService as SecurePasswordsServiceService;
-use fractorr\securepasswords\models\Settings;
-
 use Craft;
 use craft\base\Plugin;
-use craft\services\Plugins;
-use craft\events\PluginEvent;
-use craft\web\UrlManager;
-use craft\events\RegisterUrlRulesEvent;
-
 use craft\elements\User;
-use craft\services\Users;
-
-
+use craft\services\Plugins;
+use fractorr\securepasswords\assetbundles\SecurePasswords\SecurePasswordsAsset;
+use fractorr\securepasswords\models\Settings;
+use fractorr\securepasswords\services\SecurePasswordsService;
 use yii\base\Event;
-
+use yii\base\ModelEvent;
 
 /**
  * Craft plugins are very much like little applications in and of themselves. We’ve made
@@ -37,12 +31,13 @@ use yii\base\Event;
  *
  * https://craftcms.com/docs/plugins/introduction
  *
- * @author    Trevor Orr
- * @package   SecurePasswords
+ * @author    FractOrr
+ *
  * @since     1.0.0
  *
- * @property  SecurePasswordsServiceService $securePasswordsService
  * @property  Settings $settings
+ * @property  PasswordService $passwordService
+ *
  * @method    Settings getSettings()
  */
 class SecurePasswords extends Plugin
@@ -52,147 +47,63 @@ class SecurePasswords extends Plugin
 
     /**
      * Static property that is an instance of this plugin class so that it can be accessed via
-     * SecurePasswords::$plugin
+     * SecurePasswords::$plugin.
      *
      * @var SecurePasswords
      */
     public static $plugin;
+
+    // Public Properties
+    // =========================================================================
+
+    /**
+     * To execute your plugin’s migrations, you’ll need to increase its schema version.
+     *
+     * @var string
+     */
+    public $schemaVersion = '1.0.0';
 
     // Public Methods
     // =========================================================================
 
     /**
      * Set our $plugin static property to this class so that it can be accessed via
-     * SecurePasswords::$plugin
+     * SecurePasswords::$plugin.
      *
      * Called after the plugin class is instantiated; do any one-time initialization
      * here such as hooks and events.
      *
      * If you have a '/vendor/autoload.php' file, it will be loaded for you automatically;
      * you do not need to load it in your init() method.
-     *
      */
     public function init()
     {
         parent::init();
         self::$plugin = $this;
 
-		/*
-        // Register our site routes
-        Event::on(
-            UrlManager::class,
-            UrlManager::EVENT_REGISTER_SITE_URL_RULES,
-            function (RegisterUrlRulesEvent $event) {
-                $event->rules['siteActionTrigger1'] = 'secure-passwords/default';
-            }
-        );
+        $this->name = Craft::t('secure-passwords', 'Secure Password');
 
-        // Register our CP routes
+        if (Craft::$app->request->isCpRequest) {
+            Craft::$app->view->registerAssetBundle(SecurePasswordsAsset::class);
+        }
+
         Event::on(
-            UrlManager::class,
-            UrlManager::EVENT_REGISTER_CP_URL_RULES,
-            function (RegisterUrlRulesEvent $event) {
-                $event->rules['cpActionTrigger1'] = 'secure-passwords/default/do-something';
-            }
-        );
-		
-        // Do something after we're installed
-        Event::on(
-            Plugins::class,
-            Plugins::EVENT_AFTER_INSTALL_PLUGIN,
-            function (PluginEvent $event) {
-                if ($event->plugin === $this) {
-                    // We were just installed
+            User::class,
+            User::EVENT_BEFORE_VALIDATE,
+            function (ModelEvent $event) {
+                if ($event->sender->newPassword) {
+                    $errors = $this->securePasswordsService->getValidationErrors($event->sender->newPassword);
+                    $event->isValid = count($errors) === 0;
+
+                    if (!$event->isValid) {
+                        /** @var User $user */
+                        $user = $event->sender;
+                        foreach ($errors as $error) {
+                            $user->addError('newPassword', $error);
+                        }
+                    }
                 }
             }
-        );
-		*/
-
-		Event::on(
-			User::class, 
-			User::EVENT_BEFORE_SAVE, 
-            function ($event) {
-            	$uid = $event->sender['uid'];
-            	$id = $event->sender['id'];
-				$oldPwd = $event->sender['password'];
-				$newPwd = $event->sender['newPassword'];
-            	
-            	if (!empty($uid) && !empty($oldPwd) && !empty($newPwd)) 
-            	{
-					$rules = $this->settingRulesToArray($this->getSettings()->passwordRules);
-					
-					$errors = array();
-					
-					foreach($rules as $rule)
-					{
-						if (isset($rule["active"]) && $rule["active"] && $rule["regex"] != "") 
-						{
-							preg_match("/" . $rule["regex"] . "/", $newPwd, $output_array);
-							
-							if (sizeof($output_array) == 0 && $rule["match"] == "no_match") 
-							{
-								array_push($errors, Craft::t('secure-passwords', 'Password') . ": " . $rule["message"]);
-							} 
-							else if (sizeof($output_array) != 0 && $rule["match"] == "match") 
-							{
-								array_push($errors, Craft::t('secure-passwords', 'Password') . ": " . $rule["message"]);
-							}
-						}
-					}
-					
-					if (sizeof($errors)) 
-					{
-						foreach($errors as $error) 
-						{
-							if (Craft::$app->getRequest()->getIsCpRequest()) 
-							{
-								Craft::$app->getSession()->setNotice(Craft::t('secure-passwords', $error));
-								//Craft::$app->getSession()->setFlash("error", $error);
-							}
-							
-							if (!Craft::$app->getRequest()->getIsCpRequest()) 
-							{
-								Craft::$app->getSession()->setError(Craft::t('secure-passwords', implode("<br>", $errors)));
-							}
-						}
-						
-						/*
-						echo "<pre>";
-						print_r($event->sender);
-						echo "</pre>";
-						die();
-						*/
-						
-						$event->isValid = false;
-					}
-            	}
-            }
-		);
-/**
- * Logging in Craft involves using one of the following methods:
- *
- * Craft::trace(): record a message to trace how a piece of code runs. This is mainly for development use.
- * Craft::info(): record a message that conveys some useful information.
- * Craft::warning(): record a warning message that indicates something unexpected has happened.
- * Craft::error(): record a fatal error that should be investigated as soon as possible.
- *
- * Unless `devMode` is on, only Craft::warning() & Craft::error() will log to `craft/storage/logs/web.log`
- *
- * It's recommended that you pass in the magic constant `__METHOD__` as the second parameter, which sets
- * the category to the method (prefixed with the fully qualified class name) where the constant appears.
- *
- * To enable the Yii debug toolbar, go to your user account in the AdminCP and check the
- * [] Show the debug toolbar on the front end & [] Show the debug toolbar on the Control Panel
- *
- * http://www.yiiframework.com/doc-2.0/guide-runtime-logging.html
- */
-        Craft::info(
-            Craft::t(
-                'secure-passwords',
-                '{name} plugin loaded',
-                ['name' => $this->name]
-            ),
-            __METHOD__
         );
     }
 
@@ -220,26 +131,8 @@ class SecurePasswords extends Plugin
         return Craft::$app->view->renderTemplate(
             'secure-passwords/settings',
             [
-                'settings' => $this->getSettings()
+                'settings' => $this->getSettings(),
             ]
         );
-    }
-    
-    protected function settingRulesToArray($settingRules): array
-    {
-    	$outRules = [];
-    	
-    	foreach($settingRules as $rule) 
-    	{
-    		array_push($outRules, [
-    		    "label" 	=> $rule[0],
-    		    "message" 	=> $rule[1],
-    		    "regex" 	=> $rule[2],
-    		    "match" 	=> $rule[3],
-    		    "active" 	=> $rule[4],
-    		]);
-    	}
-    	
-    	return $outRules;
     }
 }

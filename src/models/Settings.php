@@ -39,8 +39,8 @@ class Settings extends Model
      *
      * @var string
      */
-    public $someAttribute = 'Some Default';
 	public $passwordRules = '';
+	public $checkPwned = true;
 	
     // Public Methods
     // =========================================================================

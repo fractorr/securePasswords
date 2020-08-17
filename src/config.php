@@ -24,7 +24,7 @@
 
 return [
 
-    // This controls blah blah blah
-    "someAttribute" => true,
+    // This controls settings
 	"passwordRules" => true,
+	"checkPwned"    => true,
 ];
