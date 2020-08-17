@@ -82,13 +82,3 @@ Add as many rules as you want.  Here are some example to get you started.
 	    ]
     })
 }}
-
-
-{{ forms.lightSwitchField({
-	    label: 'Check Pwned database'|t('secure-passwords'),
-	    instructions: 'Check if [password](https://haveibeenpwned.com/Passwords) has been exposed in a data breach.'|t('password-'),
-	    id: 'checkPwned',
-	    name: 'checkPwned',
-	    on: settings['checkPwned']
-	}) 
-}}

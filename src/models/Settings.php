@@ -40,7 +40,6 @@ class Settings extends Model
      * @var string
      */
 	public $passwordRules = '';
-	public $checkPwned = true;
 	
     // Public Methods
     // =========================================================================

@@ -26,5 +26,4 @@ return [
 
     // This controls settings
 	"passwordRules" => true,
-	"checkPwned"    => true,
 ];
