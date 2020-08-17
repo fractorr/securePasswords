@@ -4,7 +4,7 @@
  *
  * Enforce stronger passwords on your users.
  *
- * @link      https://percipio.london
+ * @link      http://fractorr.com
  *
  * @copyright Copyright (c) 2020 FractOrr
  */

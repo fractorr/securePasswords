@@ -4,7 +4,7 @@
  *
  * Make passwords as secure as you want
  *
- * @link      http://www.fractorr.net
+ * @link      http://www.fractorr.com
  * @copyright Copyright (c) 2017 Trevor Orr
  */
 

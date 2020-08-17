@@ -16,9 +16,27 @@
 
 {% do view.registerAssetBundle("fractorr\\securepasswords\\assetbundles\\securepasswords\\SecurePasswordsAsset") %}
 
+{% set ruleInstructions = "
+Add as many rules as you want.  Here are some example to get you started.
+
+| Name                                       | Error Message                                                           | Regular Expression                                                       | Match                                   | Add                                   |
+|--------------------------------------------|-------------------------------------------------------------------------|--------------------------------------------------------------------------|-----------------------------------------|---------------------------------------|
+| 1 Number                                   | Must contain at least 1 number                                          | [0-9]                                                                    | No Match                                | ✔                                     |
+| Minimum Length                             | Must be at least 8 characters                                           | ([a-zA-Z0-9\x21-\x2F\x3A-\x40\x5B-\x60]{8,})                             | No Match                                | ✔                                     |
+| Special Character                          | Must include at least 1 special character                               | [\x21-\x2F\x3A-\x40\x5B-\x60]                                            | No Match                                | ✔                                     |
+| 4 Letters                                  | Must have at least 4 letters                                            | [a-zA-Z]{4,}                                                             | No Match                                | ✔                                     |
+| 1 Uppercase character                      | Must have at least 1 Uppercase letter                                   | [A-Z]                                                                    | No Match                                | ✔                                     |
+| 3 or more consecutive numbers              | Must not contain 3 or more numbers consecutively                        | ([0-9]{3,})                                                              | Match                                   | ✔                                     |
+| 3 or more consecutive letters              | Must not contain 3 or more letters consecutively                        | ([a-zA-Z]{3,})                                                           | Match                                   | ✔                                     |
+| No sequential numbers                      | Must not contain any sequential numbers  EG (12 or 23 or 21 or 32, etc) | (12&#124;23&#124;34&#124;45&#124;56&#124;67&#124;78&#124;89&#124;90&#124;09&#124;98&#124;87&#124;76&#124;65&#124;54&#124;43&#124;32&#124;21) | Match                                   | ✔                                     |
+| No paired numbers                          | Must not pairs of number EG (11 or 22, etc)                             | (11&#124;22&#124;33&#124;44&#124;55&#124;66&#124;77&#124;88&#124;99)                                     | Match                                   | ✔                                     |
+| No year from 1900 - 2099                   | No year allowed between 1900 - 2099                                     | ([1][9][0-9][0-9]&#124;[2][0-1][0-9][0-9])                                   | Match                                   | ✔                                     |
+|                                            |                                                                         |                                                                          |                                         |                                       |
+"  %}
+
 {{ forms.editableTableField({
 	    label: 'Password Rules',
-	    instructions: 'Add as many rules as you want',
+	    instructions: ruleInstructions,
 	    id: 'passwordRules',
 	    name: 'passwordRules',
 	    rows: settings['passwordRules'],
@@ -68,7 +86,7 @@
 
 {{ forms.lightSwitchField({
 	    label: 'Check Pwned database'|t('secure-passwords'),
-	    instructions: 'Check the [Pwned Passwords](https://haveibeenpwned.com/Passwords) database.'|t('password-policy'),
+	    instructions: 'Check if [password](https://haveibeenpwned.com/Passwords) has been exposed in a data breach.'|t('password-'),
 	    id: 'checkPwned',
 	    name: 'checkPwned',
 	    on: settings['checkPwned']

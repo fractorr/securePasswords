@@ -42,9 +42,8 @@ class SecurePasswordsAsset extends AssetBundle
      */
     public function init()
     {
-    	/*
         // define the path that your publishable resources live
-        $this->sourcePath = "@fractorr/secure-passwords/assetbundles/securepasswords/dist";
+        $this->sourcePath = "@fractorr/securepasswords/assetbundles/securepasswords/dist";
 
         // define the dependencies
         $this->depends = [
@@ -60,7 +59,6 @@ class SecurePasswordsAsset extends AssetBundle
         $this->css = [
             'css/SecurePasswords.css',
         ];
-		*/
 		
         parent::init();
     }
