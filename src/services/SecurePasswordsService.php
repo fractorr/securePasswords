@@ -50,11 +50,11 @@ class SecurePasswordsService extends Component
 				
 				if (sizeof($output_array) == 0 && $rule["match"] == "no_match") 
 				{
-					array_push($errors, Craft::t('secure-passwords', $rule["message"]);
+					array_push($errors, Craft::t('secure-passwords', $rule["message"]));
 				} 
 				else if (sizeof($output_array) != 0 && $rule["match"] == "match") 
 				{
-					array_push($errors, Craft::t('secure-passwords', $rule["message"]);
+					array_push($errors, Craft::t('secure-passwords', $rule["message"]));
 				}
 			}
 		}
